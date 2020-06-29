@@ -32,6 +32,7 @@ from taiga.base.utils import json
 from taiga.permissions.choices import MEMBERS_PERMISSIONS, ANON_PERMISSIONS
 from taiga.projects.occ import OCCResourceMixin
 from taiga.projects.tasks import services
+from taiga.projects.tasks.models import Task
 from taiga.projects.userstories.models import UserStory
 
 from .. import factories as f
@@ -1137,8 +1138,12 @@ def test_promote_task_to_us(client):
     assert us_response.data["subject"] == task.subject
     assert us_response.data["description"] == task.description
     assert us_response.data["owner"] == task.owner_id
-    assert us_response.data["generated_from_task"] == task.id
+    assert us_response.data["generated_from_task"] == None
     assert us_response.data["assigned_users"] == {user_2.id}
     assert us_response.data["total_watchers"] == 2
     assert us_response.data["total_attachments"] == 1
     assert us_response.data["total_comments"] == 2
+
+    # check if task is deleted
+    assert us_response.data["from_task_ref"] == us.from_task_ref
+    assert not Task.objects.filter(pk=task.id).exists()

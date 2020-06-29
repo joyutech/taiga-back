@@ -16,6 +16,7 @@
 from django.apps import apps
 from django.core.files.base import ContentFile
 from django.db.models import signals
+from django.utils.translation import ugettext_lazy as _
 
 from taiga.projects.attachments.models import Attachment
 from taiga.projects.history.models import HistoryEntry
@@ -39,7 +40,7 @@ def promote_to_us(source_obj):
     for obj in queryset:
         us = UserStory.objects.create(
             generated_from_issue_id=obj.id if model_class.__name__ == "Issue" else None,
-            generated_from_task_id=obj.id if model_class.__name__ == "Task" else None,
+            from_task_ref = _("Task #%(ref)s") % {"ref": obj.ref} if model_class.__name__ == "Task" else None,
             project=obj.project,
             owner=obj.owner,
             subject=obj.subject,
